@@ -11,20 +11,25 @@ class Creature {
 		string name;
 		string type;
 		int HP;
+		int xpos;
+		int ypos;
 
 	public:
-		Creature(const string & name, const string & type, const int & HP);
+		Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos);
 		string getName() const;
 		string getType() const;
 		int getHP() const;
-		void go(const int way); // – gå åt håll
+		void go(const int xDir, const int yDir); // – gå åt håll
 		void fight(Creature & enemy); // – slåss med
 		void pick_up(const Item &); // – ta upp sak
 		void drop(const Item &); // – släpp sak på marken
 		void talk_to(Creature & npc); // – konversera med
+		int getXpos() const;
+		int getYpos() const;
 };
 
-Creature::Creature(const string & name, const string & type, const int & HP) : name(name), type(type), HP(HP) {}
+Creature::Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos) 
+	: name(name), type(type), HP(HP), xpos(xpos), ypos(ypos) {}
 
 string Creature::getName() const {
 	return name;
@@ -38,8 +43,9 @@ int Creature::getHP() const {
 	return HP;
 }
 
-void Creature::go(const int way) {
-
+void Creature::go(const int xDir, const int yDir) {
+	xpos += xDir;
+	ypos += yDir;
 }
 void Creature::fight(Creature & enemy) {
 
@@ -52,6 +58,14 @@ void Creature::drop(const Item &){
 }
 void Creature::talk_to(Creature & npc) {
 
+}
+
+int Creature::getXpos() const {
+	return xpos;
+}
+
+int Creature::getYpos() const {
+	return ypos;
 }
 
 #endif

@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include "item.h"
 
+#ifndef BACKPACK_H
+#define BACKPACK_H
+
 using namespace std;
 
 class Backpack {
@@ -49,3 +52,5 @@ ostream & operator<<(ostream & os, const Backpack & backpack) {
 	}
 	return os;
 }
+
+#endif

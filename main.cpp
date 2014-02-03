@@ -2,44 +2,58 @@
 #include <fstream>
 #include "creatures/character.h"
 #include "environment/environment.h"
+#include "board.h"
 
 using namespace std;
 
 bool readIntro();
 void clearScreen();
-void startUp(bool newGame);
+Character startUp(bool newGame);
 void createCharacter(bool newGame);
 void loadMap(bool newGame);
 int main() 
 {
 	bool newGame = readIntro();
 
-	startUp(newGame);
-
+	Character heroS = startUp(newGame);
+	Character * hero = &heroS;
 	createCharacter(newGame);
 
 	loadMap(newGame);
+	Board testMap("start.txt", hero);
 
 	while(1) {
-		break;
+		string command;
+		cin >> command;
+		if(command == "w") {
+			hero->go(0,-1);
+		} else if(command == "a") {
+			hero->go(-1,0);
+		} else if(command == "s") {
+			hero->go(0,1);
+		} else if(command == "d") {
+			hero->go(1,0);
+		} else if(command == "exit") {
+			break;
+		}
+		clearScreen();
+		testMap.updateMap();
+		
 	}
 	return 0;
 }
 
-void startUp(bool newGame) {
-	if(newGame) {
+Character startUp(bool newGame) {
+
 		cout << "The first thing you need to do is to choose a character name.\nName: ";
 		string name;
-		cin >> name;
-		Character hero(name);
+		cin.ignore();
+		getline(cin, name);
+		Character hero(name, 10, 19);
 		cout << "Great choice " << hero.getName() << "!" << endl;
+		return hero;
 
-		Environment testMap("start.txt");
-		testMap.printMap();
 
-	} else {
-
-	}
 }
 
 void createCharacter(bool newGame) {

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <map>
 #include <vector>
+#include "../creatures/creature.h"
 #include "../item.h"
 
 #define NUMBER_OF_ITEM_ATTRIBUTES 4
@@ -27,6 +28,9 @@ class Environment {
 		~Environment();
 		void printMap() const;
 		void parseMapFile(ifstream & map);
+		int getHeight() const;
+		int getWidth() const;
+		void updateField(vector<Creature *> & creatureVec);
 };
 
 Environment::Environment(const string & name) : name(name) {
@@ -60,7 +64,7 @@ void Environment::parseMapFile(ifstream & map) {
 	}
 	int itemCnt = 2;
 	while(getline(map, line) && line != "description") {
-		cout << "line: " << height << endl;
+		// cout << "line: " << height << endl;
 		string name = line;
 		getline(map, line);
 		int weigth = atoi(line.c_str());
@@ -99,5 +103,54 @@ void Environment::printMap() const {
 
 	cout << "Description:\n" << description << endl;
 }
+
+int Environment::getHeight() const {
+	return height;
+}
+
+int Environment::getWidth() const {
+	return width;
+}
+
+void Environment::updateField(vector<Creature *> & creatureVec) {
+	map<int, int *> orderedItemMap(environmentMap.begin(), environmentMap.end());
+	string map[height];
+	int j = 0;
+	for(auto mapIterator = orderedItemMap.begin(); mapIterator != orderedItemMap.end(); ++mapIterator) { 
+		for (int i = 0; i < width; ++i) {
+			if(mapIterator->second[i] == 0) {
+				map[j] += " ";
+			}
+			else if(mapIterator->second[i] == 1) {
+				map[j] += "#";
+			}
+			else if(mapIterator->second[i] > 1) {
+				map[j] += "I";
+			}
+		}
+		j++;
+	}
+	for(auto it = creatureVec.begin(); it != creatureVec.end(); ++it) {
+		int xpos = (*it)->getXpos();
+		int ypos = (*it)->getYpos();
+		cout << "xpos: " << xpos << endl;
+		if(it == creatureVec.begin()) {
+			cout << "heeej" << endl;
+			string tmp = "H";
+			map[ypos][xpos] = tmp[0];
+		} 
+		else {
+			string tmp = "M";
+			map[ypos][xpos] = tmp[0];
+		}
+	}
+	for(j = 0; j < height; ++j) { 
+		for (int i = 0; i < width; ++i) {
+			cout << map[j][i];
+		}
+		cout << endl;
+	}	
+}
+
 
 #endif
