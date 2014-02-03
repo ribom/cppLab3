@@ -1,0 +1,4 @@
+Hello and welcome to our fantastic game!
+
+1. Start a new game
+2. Load an existing game
