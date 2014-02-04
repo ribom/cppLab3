@@ -44,8 +44,8 @@ int Creature::getHP() const {
 }
 
 void Creature::go(const int xDir, const int yDir) {
-	xpos += xDir;
-	ypos += yDir;
+	xpos = xDir;
+	ypos = yDir;
 }
 void Creature::fight(Creature & enemy) {
 

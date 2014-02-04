@@ -30,7 +30,7 @@ class Environment {
 		void parseMapFile(ifstream & map);
 		int getHeight() const;
 		int getWidth() const;
-		void updateField(vector<Creature *> & creatureVec);
+		vector<string> updateField();
 };
 
 Environment::Environment(const string & name) : name(name) {
@@ -112,44 +112,25 @@ int Environment::getWidth() const {
 	return width;
 }
 
-void Environment::updateField(vector<Creature *> & creatureVec) {
+vector<string> Environment::updateField() {
 	map<int, int *> orderedItemMap(environmentMap.begin(), environmentMap.end());
-	string map[height];
-	int j = 0;
-	for(auto mapIterator = orderedItemMap.begin(); mapIterator != orderedItemMap.end(); ++mapIterator) { 
+	vector<string> map;
+	for(auto mapIterator = orderedItemMap.begin(); mapIterator != orderedItemMap.end(); ++mapIterator) {
+		string row;
 		for (int i = 0; i < width; ++i) {
 			if(mapIterator->second[i] == 0) {
-				map[j] += " ";
+				row += " ";
 			}
 			else if(mapIterator->second[i] == 1) {
-				map[j] += "#";
+				row += "#";
 			}
 			else if(mapIterator->second[i] > 1) {
-				map[j] += "I";
+				row += "I";
 			}
 		}
-		j++;
+		map.push_back(row); 
 	}
-	for(auto it = creatureVec.begin(); it != creatureVec.end(); ++it) {
-		int xpos = (*it)->getXpos();
-		int ypos = (*it)->getYpos();
-		cout << "xpos: " << xpos << endl;
-		if(it == creatureVec.begin()) {
-			cout << "heeej" << endl;
-			string tmp = "H";
-			map[ypos][xpos] = tmp[0];
-		} 
-		else {
-			string tmp = "M";
-			map[ypos][xpos] = tmp[0];
-		}
-	}
-	for(j = 0; j < height; ++j) { 
-		for (int i = 0; i < width; ++i) {
-			cout << map[j][i];
-		}
-		cout << endl;
-	}	
+	return map;
 }
 
 

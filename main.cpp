@@ -13,6 +13,7 @@ void createCharacter(bool newGame);
 void loadMap(bool newGame);
 int main() 
 {
+	bool run = true;
 	bool newGame = readIntro();
 
 	Character heroS = startUp(newGame);
@@ -20,24 +21,13 @@ int main()
 	createCharacter(newGame);
 
 	loadMap(newGame);
-	Board testMap("start.txt", hero);
+	Board board("start.txt", hero);
 
-	while(1) {
-		string command;
-		cin >> command;
-		if(command == "w") {
-			hero->go(0,-1);
-		} else if(command == "a") {
-			hero->go(-1,0);
-		} else if(command == "s") {
-			hero->go(0,1);
-		} else if(command == "d") {
-			hero->go(1,0);
-		} else if(command == "exit") {
-			break;
-		}
+	while(run) {
+		run = board.takeCommand();
+
 		clearScreen();
-		testMap.updateMap();
+		board.updateMap();
 		
 	}
 	return 0;
@@ -52,8 +42,6 @@ Character startUp(bool newGame) {
 		Character hero(name, 10, 19);
 		cout << "Great choice " << hero.getName() << "!" << endl;
 		return hero;
-
-
 }
 
 void createCharacter(bool newGame) {
