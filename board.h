@@ -1,41 +1,92 @@
 #include <iostream>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h> 
 #include "creatures/character.h"
 #include "environment/environment.h"
+#include <unordered_map>
 
 using namespace std;
 
 class Board {
 	private:
 		Environment * currentMap;
-		vector<Creature *> creaturesOnMap;
-		vector<Environment *> usedMaps;
+		unordered_map<string, Environment *> usedMaps;
 		string command;
+		string info;
+		vector<string> mapMatrix;
 
 	public:
 		Board(const string & mapName, Creature * character);
 		~Board();
-		void updateMap();
-		void loadCreatures(Creature * character);
+		void updateMainMap();
+		void updateMaps();
+		void printMapMatrix();
+		void loadCreature(const int & direction, Creature * character, const string & nextMap);
 		bool takeCommand();
-		void tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos);
+		bool tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos, Environment * env);
+		void enterNewMap(const int & direction, Creature * creature, Environment * environment);
 };
 
 
 Board::Board(const string & mapName, Creature * character) {
 	currentMap = new Environment(mapName);
-	usedMaps.push_back(currentMap);
-	loadCreatures(character);
- 	updateMap();
-	
+	usedMaps.insert(make_pair(mapName, currentMap));
+	usedMaps.at(mapName);
+	currentMap->addCreature(character);
+	loadCreature(1, character, mapName);
+ 	updateMaps();
+ 	
 }
 
 Board::~Board() {
 	for(auto it = usedMaps.begin(); it != usedMaps.end(); ++it) {
-		delete *it;
+		delete (*it).second;
 	}
 }
 
+void Board::loadCreature(const int & direction, Creature * character, const string & nextMap) {
+	if(direction == 0) {
+		character->go(usedMaps.at(nextMap)->getWidth() / 2, 0);
+	}
+	else if(direction == 1) {
+		character->go(usedMaps.at(nextMap)->getWidth() / 2, usedMaps.at(nextMap)->getHeight()-1);
+	}
+	else if(direction == 2) {
+		character->go(usedMaps.at(nextMap)->getWidth()-1, usedMaps.at(nextMap)->getHeight() / 2);
+	}
+	else if(direction == 3) {
+		character->go(0, usedMaps.at(nextMap)->getHeight() / 2); 
+	}
+	
+}
+
+void Board::enterNewMap(const int & direction, Creature * creature, Environment * environment) {
+	string nextMap = environment->getNeighbor(direction);
+	if(nextMap != "0") {
+		if(usedMaps.find(nextMap) == usedMaps.end()) {
+			usedMaps.insert(make_pair(nextMap, new Environment(nextMap)));
+		}
+		vector<Creature *> * creaturesOnMap = environment->getCreaturesOnMap();
+		for(auto it = creaturesOnMap->begin(); it != creaturesOnMap->end(); ++it) {
+			if(*it == creature) {
+				creaturesOnMap->erase(it);
+				break;
+			}
+		}
+		usedMaps.at(nextMap)->addCreature(creature);
+		loadCreature(direction, creature, nextMap);
+		if(creature->getType() == "Hero") {
+			currentMap = usedMaps.at(nextMap);
+		}
+	 	
+ 	}
+ 	else {
+ 		cout << "it appears you went into oblivion..." << endl;
+ 	}
+}
+
 bool Board::takeCommand() {
+	cout << "\nCommand: ";
 	cin >> command;
 	if(command == "exit") {
 		return false;
@@ -43,59 +94,114 @@ bool Board::takeCommand() {
 	return true;
 }
 
-void Board::updateMap() {
-	vector<string> map = currentMap->updateField();
+void Board::updateMainMap() {
+	info = "";
+	bool enterdNewMap;
+	vector<Creature *> * creaturesOnMap = currentMap->getCreaturesOnMap();
+	mapMatrix = currentMap->updateField();
+	Item * itemOnMap = NULL;
+	int xpos, ypos;
+	for(auto it = creaturesOnMap->rbegin(); it != creaturesOnMap->rend(); ++it) {
+		xpos = (*it)->getXpos();
+		ypos = (*it)->getYpos();
+		enterdNewMap = tryMove(mapMatrix, *it, xpos, ypos, currentMap);
 
-	for(auto it = creaturesOnMap.begin(); it != creaturesOnMap.end(); ++it) {
-		int xpos = (*it)->getXpos();
-		int ypos = (*it)->getYpos();
-		tryMove(map, *it, xpos, ypos);
-
-		if(it == creaturesOnMap.begin()) {
-			string tmp = "H";
-			map[ypos][xpos] = tmp[0];
+		if((*it)->getType() == "Hero") {
+			if(mapMatrix[ypos][xpos] == 'I') {
+				itemOnMap = currentMap->getItem(ypos, xpos);
+			}
+			mapMatrix[ypos][xpos] = 'H';
 		} 
 		else {
-			string tmp = "M";
-			map[ypos][xpos] = tmp[0];
+			mapMatrix[ypos][xpos] = 'M';
 		}
 	}
-	for(unsigned j = 0; j < map.size(); ++j) { 
-		for (unsigned i = 0; i < map[0].size(); ++i) {
-			cout << map[j][i];
+	if(!enterdNewMap) {
+		printMapMatrix();
+		if(itemOnMap != NULL) {
+			cout << "Oh! You've found an item, with the following stats: " << endl << *itemOnMap << "\nDo you want to pick it up? (y/n): ";
+			cin >> command;
+			if(command == "y") {
+				if((*creaturesOnMap)[0]->pick_up(itemOnMap)) {
+					currentMap->removeItem(xpos, ypos);
+				}
+			}
 		}
-		cout << endl;
+	}
+	cout << info << endl;
+}
+
+void Board::printMapMatrix() {
+	for(unsigned j = 0; j < mapMatrix.size(); ++j) { 
+		for (unsigned i = 0; i < mapMatrix[0].size(); ++i) {
+			cout << mapMatrix[j][i];
+		}
+	cout << endl;
 	}
 }
 
-void Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos) {
+void Board::updateMaps() {
+	for(auto it = usedMaps.begin(); it != usedMaps.end(); ++it) {
+		if(it->second == currentMap) {
+			updateMainMap();
+		} 
+		else {
+			vector<Creature *> * creaturesOnMap = it->second->getCreaturesOnMap();
+			vector<string> map = it->second->updateField();
+			for(auto itCreature = creaturesOnMap->rbegin(); itCreature != creaturesOnMap->rend(); ++itCreature) {
+				int xpos = (*itCreature)->getXpos();
+				int ypos = (*itCreature)->getYpos();
+				tryMove(map, *itCreature, xpos, ypos, it->second);
+			}
+		}
+	}
+}
+
+bool Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos, Environment * env) {
 	int wantXpos = 0;
 	int wantYpos = 0;
-	if(command == "w") {
-		wantYpos = -1;
-	} else if(command == "a") {
-		wantXpos = -1;
-	} else if(command == "s") {
-		wantYpos = 1;
-	} else if(command == "d") {
-		wantXpos = 1;
+	if(it->getType() == "Hero") {
+		if(command == "w") {
+			wantYpos = -1;
+		} else if(command == "a") {
+			wantXpos = -1;
+		} else if(command == "s") {
+			wantYpos = 1;
+		} else if(command == "d") {
+			wantXpos = 1;
+		}
+	}
+	else if(it->getType() == "Monster") {
+		srand (time(NULL));
+		wantXpos = (rand() % 3 + 1)-2;
+		wantYpos = (rand() % 3 + 1)-2;
 	}
 	wantXpos += xpos;
 	wantYpos += ypos;
-	string tmp = "#"; 
-	if(xpos < 0 || ypos < 0 || (unsigned)xpos > map[0].size() || (unsigned)ypos > map.size()) {
-		cout << "lets move to the next map!!" << endl;
+	if(wantXpos < 0) {
+		enterNewMap(2, it, env);
 	}
-	if(map[wantYpos][wantXpos] == tmp[0]) {
-		cout << "That's the wall! And you're not a ghost, no matter what you might believe!" << endl;
+	else if(wantYpos < 0) {
+		enterNewMap(1, it, env);
+	}
+	else if((unsigned)wantXpos > map.size()-1) {
+		enterNewMap(3, it, env);
+	}
+	else if((unsigned)wantYpos > map[0].size()-1) {
+		enterNewMap(0, it, env);
 	}
 	else {
-		it->go(wantXpos, wantYpos); 
-		xpos = wantXpos;
-		ypos = wantYpos;
+		if(map[wantYpos][wantXpos] == '#') {
+			if(it->getType() == "Hero") {
+				info = "That's the wall! And you're not a ghost, no matter what you might believe!";
+			}
+		}
+		else {
+			it->go(wantXpos, wantYpos); 
+			xpos = wantXpos;
+			ypos = wantYpos;
+		}
+		return false;
 	}
-}
-
-void Board::loadCreatures(Creature * character) {
-	creaturesOnMap.push_back(character);
+	return true;
 }

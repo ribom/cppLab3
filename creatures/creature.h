@@ -11,6 +11,8 @@ class Creature {
 		string name;
 		string type;
 		int HP;
+		
+	protected:		
 		int xpos;
 		int ypos;
 
@@ -19,10 +21,10 @@ class Creature {
 		string getName() const;
 		string getType() const;
 		int getHP() const;
-		void go(const int xDir, const int yDir); // – gå åt håll
+		virtual void go(const int xDir, const int yDir) = 0; // – gå åt håll
 		void fight(Creature & enemy); // – slåss med
-		void pick_up(const Item &); // – ta upp sak
-		void drop(const Item &); // – släpp sak på marken
+		virtual bool pick_up(const Item * item) = 0; // – ta upp sak
+		void drop(const Item * item); // – släpp sak på marken
 		void talk_to(Creature & npc); // – konversera med
 		int getXpos() const;
 		int getYpos() const;
@@ -43,17 +45,11 @@ int Creature::getHP() const {
 	return HP;
 }
 
-void Creature::go(const int xDir, const int yDir) {
-	xpos = xDir;
-	ypos = yDir;
-}
 void Creature::fight(Creature & enemy) {
 
 }
-void Creature::pick_up(const Item &) {
 
-}
-void Creature::drop(const Item &){
+void Creature::drop(const Item * item){
 
 }
 void Creature::talk_to(Creature & npc) {

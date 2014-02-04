@@ -17,7 +17,7 @@ class Backpack {
 		Backpack();
 		~Backpack();
 
-		void addItem(const Item * item);
+		bool addItem(const Item * item);
 		friend ostream & operator<<(ostream & os, const Backpack & backpack);
 };
 
@@ -29,17 +29,19 @@ Backpack::~Backpack() {
 	}
 }
 
-void Backpack::addItem(const Item * item) {
+bool Backpack::addItem(const Item * item) {
 	auto gotItem = itemMap.find(item->getName());
 
 	if(gotItem == itemMap.end()) {
 		if(capacity - item->getWeigth() >= 0) {
 			itemMap.insert(make_pair(item->getName(), const_cast<Item*>(item)));
 			numberOfItems++;
+			return true;
 		} else {
 			cout << "This item weighs to much. You need " << item->getWeigth() - capacity << " more capacity to carry it." << endl; 
 		}
 	}
+	return false;
 }
 
 ostream & operator<<(ostream & os, const Backpack & backpack) {

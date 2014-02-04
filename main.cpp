@@ -21,13 +21,13 @@ int main()
 	createCharacter(newGame);
 
 	loadMap(newGame);
-	Board board("start.txt", hero);
+	Board board("start", hero);
 
 	while(run) {
 		run = board.takeCommand();
 
 		clearScreen();
-		board.updateMap();
+		board.updateMaps();
 		
 	}
 	return 0;
@@ -39,7 +39,7 @@ Character startUp(bool newGame) {
 		string name;
 		cin.ignore();
 		getline(cin, name);
-		Character hero(name, 10, 19);
+		Character hero(name, 10, 18);
 		cout << "Great choice " << hero.getName() << "!" << endl;
 		return hero;
 }
