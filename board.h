@@ -76,9 +76,10 @@ void Board::enterNewMap(const int & direction, Creature * creature, Environment 
 		usedMaps.at(nextMap)->addCreature(creature);
 		loadCreature(direction, creature, nextMap);
 		if(creature->getType() == "Hero") {
+			cout << "nextMap: " << nextMap << endl;
 			currentMap = usedMaps.at(nextMap);
-			command = "";
-			updateMaps();
+			//command = "";
+			//updateMaps();
 		}
 	 	
  	}
@@ -209,3 +210,6 @@ bool Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos,
 	}
 	return true;
 }
+
+
+// heeej erik
