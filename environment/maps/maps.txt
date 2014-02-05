@@ -2,3 +2,4 @@ start
 desert
 ocean
 forest
+castle

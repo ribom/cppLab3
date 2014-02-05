@@ -84,7 +84,7 @@ void Environment::parseMapFile(ifstream & map) {
 	getline(map, line);
 	height = atoi(line.c_str());
 	getline(map, line);
-	width = line.length();
+	width = atoi(line.c_str());
 
 	for(int j = 0; j < height; ++j) {
 		getline(map, line);

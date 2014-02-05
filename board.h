@@ -77,6 +77,8 @@ void Board::enterNewMap(const int & direction, Creature * creature, Environment 
 		loadCreature(direction, creature, nextMap);
 		if(creature->getType() == "Hero") {
 			currentMap = usedMaps.at(nextMap);
+			command = "";
+			updateMaps();
 		}
 	 	
  	}
@@ -132,6 +134,7 @@ void Board::updateMainMap() {
 }
 
 void Board::printMapMatrix() {
+	system("clear");
 	for(unsigned j = 0; j < mapMatrix.size(); ++j) { 
 		for (unsigned i = 0; i < mapMatrix[0].size(); ++i) {
 			cout << mapMatrix[j][i];
@@ -191,6 +194,7 @@ bool Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos,
 		enterNewMap(0, it, env);
 	}
 	else {
+		cout << "xpos: " << wantXpos << " ypos: " << wantYpos << endl;
 		if(map[wantYpos][wantXpos] == '#') {
 			if(it->getType() == "Hero") {
 				info = "That's the wall! And you're not a ghost, no matter what you might believe!";
