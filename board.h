@@ -97,6 +97,23 @@ bool Board::takeCommand() {
 	return true;
 }
 
+void Board::updateMaps() {
+	for(auto it = usedMaps.begin(); it != usedMaps.end(); ++it) {
+		if(it->second == currentMap) {
+			updateMainMap();
+		} 
+		else {
+			vector<Creature *> * creaturesOnMap = it->second->getCreaturesOnMap();
+			vector<string> map = it->second->updateField();
+			for(auto itCreature = creaturesOnMap->rbegin(); itCreature != creaturesOnMap->rend(); ++itCreature) {
+				int xpos = (*itCreature)->getXpos();
+				int ypos = (*itCreature)->getYpos();
+				tryMove(map, *itCreature, xpos, ypos, it->second);
+			}
+		}
+	}
+}
+
 void Board::updateMainMap() {
 	info = "";
 	bool enterdNewMap;
@@ -141,23 +158,6 @@ void Board::printMapMatrix() {
 			cout << mapMatrix[j][i];
 		}
 	cout << endl;
-	}
-}
-
-void Board::updateMaps() {
-	for(auto it = usedMaps.begin(); it != usedMaps.end(); ++it) {
-		if(it->second == currentMap) {
-			updateMainMap();
-		} 
-		else {
-			vector<Creature *> * creaturesOnMap = it->second->getCreaturesOnMap();
-			vector<string> map = it->second->updateField();
-			for(auto itCreature = creaturesOnMap->rbegin(); itCreature != creaturesOnMap->rend(); ++itCreature) {
-				int xpos = (*itCreature)->getXpos();
-				int ypos = (*itCreature)->getYpos();
-				tryMove(map, *itCreature, xpos, ypos, it->second);
-			}
-		}
 	}
 }
 
