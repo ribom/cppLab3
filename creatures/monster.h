@@ -7,16 +7,19 @@ class Monster : public Creature {
 	private:
 		Item * item;
 	public:
-		Monster(const string & name, int xpos, int ypos);
+		Monster(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image);
 		~Monster();
 		virtual void go(const int xDir, const int yDir);
 		virtual bool pick_up(const Item * item);
 
 };
 
-Monster::Monster(const string & name, int xpos, int ypos) : Creature(name, "Monster", 100, xpos, ypos) {
-	item = new Item(20, "Monster armor");
+Monster::Monster(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image) 
+	: Creature(name, type, 100, xpos, ypos, image) {
+	//item = new Item(20, "Monster armor");
 }
+
+Monster::~Monster(){}
 
 bool Monster::pick_up(const Item * item){
 	return false;
@@ -24,8 +27,10 @@ bool Monster::pick_up(const Item * item){
 
 
 void Monster::go(const int xDir, const int yDir) {
-	xpos = xDir;
-	ypos = yDir;
+	if(mayMove) {
+		xpos = xDir;
+		ypos = yDir;
+	}
 }
 
 #endif

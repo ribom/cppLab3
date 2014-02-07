@@ -1,5 +1,5 @@
 normal
-0
+home
 desert
 ocean
 forest
@@ -24,18 +24,22 @@ forest
 10000000000000000101
 10000000000000000101
 10000000000000000101
-11111111111111111111
+11111111110111111111
 helm
 15
+helm
 18
 18
 sword
 20
+sword2
 13
 4
 description
 This is a plain field of roses. But far to the north you can see a lonely mountain...
 Urulg the Ugly
+Troll
 3
 3
+troll
 done
