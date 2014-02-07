@@ -12,39 +12,42 @@ class Backpack {
 	private:
 		int capacity;
 		int numberOfItems;
-		unordered_map<string, Item*> itemMap;
+		unordered_map<string, Item*> * itemMap;
 	public:
 		Backpack();
 		~Backpack();
-		unordered_map<string, Item*> getItemMap() const;
+		unordered_map<string, Item*> * getItemMap() const;
 		bool isEmpty() const;
 		bool addItem(const Item * item);
 		friend ostream & operator<<(ostream & os, const Backpack & backpack);
 };
 
-Backpack::Backpack() : capacity(100), numberOfItems(0) {}
-
-Backpack::~Backpack() {
-	for(auto mapIterator = itemMap.begin(); mapIterator != itemMap.end(); ++mapIterator) {
-		delete mapIterator->second;
-	}
+Backpack::Backpack() : capacity(100), numberOfItems(0) {
+	itemMap = new unordered_map<string, Item*>(); 
 }
 
-unordered_map<string, Item*> Backpack::getItemMap() const {
+Backpack::~Backpack() {
+	for(auto mapIterator = itemMap->begin(); mapIterator != itemMap->end(); ++mapIterator) {
+		delete mapIterator->second;
+	}
+	delete itemMap;
+}
+
+unordered_map<string, Item*> * Backpack::getItemMap() const {
 	return itemMap;
 }
 
 bool Backpack::isEmpty() const {
-	return itemMap.empty();
+	return itemMap->empty();
 }
 
 bool Backpack::addItem(const Item * item) {
-	auto gotItem = itemMap.find(item->getName());
-
-	if(gotItem == itemMap.end()) {
+	auto gotItem = itemMap->find(item->getName());
+	if(gotItem == itemMap->end()) {
 		if(capacity - item->getWeight() >= 0) {
-			itemMap.insert(make_pair(item->getName(), const_cast<Item*>(item)));
+			itemMap->insert(make_pair(item->getName(), const_cast<Item*>(item)));
 			numberOfItems++;
+			cout << "backpack: " << *this << endl; 
 			return true;
 		} else {
 			cout << "This item weighs to much. You need " << item->getWeight() - capacity << " more capacity to carry it." << endl; 
@@ -54,12 +57,11 @@ bool Backpack::addItem(const Item * item) {
 }
 
 ostream & operator<<(ostream & os, const Backpack & backpack) {
-	map<string, Item*> orderedItemMap(backpack.itemMap.begin(), backpack.itemMap.end());
+	map<string, Item*> orderedItemMap(backpack.itemMap->begin(), backpack.itemMap->end());
 
 	size_t extraSpace = 30;
-	os << "Item" << setw(extraSpace - 4) << "Weigth" << endl;
 	for(auto mapIterator = orderedItemMap.begin(); mapIterator != orderedItemMap.end(); ++mapIterator) { 
-		os << mapIterator->second;
+		os << mapIterator->second->getName() << setw(extraSpace - mapIterator->second->getName().size()) << mapIterator->second->getWeight() << endl;
 	}
 	return os;
 }

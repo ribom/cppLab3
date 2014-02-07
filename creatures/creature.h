@@ -19,18 +19,19 @@ class Creature {
 		int xpos;
 		int ypos;
 		bool mayMove;
-		Backpack backpack;
+		Backpack * backpack;
 
 	public:
 		Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos, const Artdisplayer & image);
+		~Creature();
 		string getName() const;
 		string getType() const;
 		string getImageName() const;
-		Backpack getBackpack() const;
+		Backpack * getBackpack() const;
 		int getHP() const;
 		virtual void go(const int xDir, const int yDir) = 0; // – gå åt håll
 		bool fight(Creature * enemy); // – slåss med
-		virtual bool pick_up(const Item * item) = 0; // – ta upp sak
+		bool pick_up(const Item * item); // – ta upp sak
 		void drop(const Item * item); // – släpp sak på marken
 		void talk_to(Creature & npc); // – konversera med
 		int getXpos() const;
@@ -43,8 +44,15 @@ class Creature {
 Creature::Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos, const Artdisplayer & image) 
 	: name(name), type(type), HP(HP), creatureImage(image), xpos(xpos), ypos(ypos) {
 		mayMove = true;
+		backpack = new Backpack();
 	}
-Backpack Creature::getBackpack() const {
+Creature::~Creature(){}
+
+bool Creature::pick_up(const Item * item) {
+	return backpack->addItem(item);
+}
+
+Backpack * Creature::getBackpack() const {
 	return backpack;
 }
 
@@ -88,7 +96,7 @@ bool Creature::fight(Creature * enemy) {
 
 void Creature::printBackpack() const {
 	cout << "Your backpack contains the following:" << endl;
-	cout << backpack << endl;
+	cout << *backpack << endl;
 }
 
 void Creature::drop(const Item * item){

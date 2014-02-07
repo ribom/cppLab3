@@ -12,7 +12,6 @@ class Character : public Creature {
 	public:
 		Character(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image);
 		~Character();
-		virtual bool pick_up(const Item * item);
 		virtual void go(const int xDir, const int yDir);
 
 };
@@ -30,8 +29,5 @@ Character::Character(const string & name, const string & type, int xpos, int ypo
 
 Character::~Character(){};
 
-bool Character::pick_up(const Item * item) {
-	return backpack.addItem(item);
-}
 
 #endif

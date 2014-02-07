@@ -14,6 +14,7 @@ class Item {
 
 	public:
 		Item(const int & weigth, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos);
+		~Item();
 		int getWeight() const;
 		int getYpos() const;
 		int getXpos() const;
@@ -27,6 +28,8 @@ class Item {
 
 Item::Item(const int & weight, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos)
  	: weight(weight), xpos(xpos), ypos(ypos), name(name), itemImage(image) {}
+
+Item::~Item(){}
 
 int Item::getWeight() const {
 	return weight;

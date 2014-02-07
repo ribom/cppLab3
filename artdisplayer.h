@@ -15,6 +15,7 @@ class Artdisplayer{
 		string imageName;
 	public:
 		Artdisplayer(const string & path);
+		~Artdisplayer();
 		friend ostream & operator<<(ostream & os, const Artdisplayer & artDisp);
 		string getImage() const;
 		string getImageName() const;
@@ -41,6 +42,8 @@ Artdisplayer::Artdisplayer(const string & name) { //name will contain part of th
 	imageFile.close();
 
 }
+
+Artdisplayer::~Artdisplayer(){}
 
 string Artdisplayer::getImageName() const {
 	return imageName;

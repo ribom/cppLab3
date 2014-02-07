@@ -9,6 +9,7 @@
 #include "../creatures/creature.h"
 #include "../creatures/monster.h"
 #include "../creatures/character.h"
+#include "../backpack.h"
 #include "../item.h"
 
 #define NUMBER_OF_ITEM_ATTRIBUTES 4
@@ -26,7 +27,7 @@ class Environment {
 		vector<Creature *> creaturesOnMap;
 		string type;
 		string neighbors[4]; // 0 = south, 1 = north, 2 = west, 3 = east
-		vector<Item *> itemVector; //just nu kan det max finnas 8 saker på varje karta
+		vector<Item *> itemVector;
 	public:
 		Environment(const string & name, const string & path);
 		~Environment();
@@ -41,6 +42,7 @@ class Environment {
 		void removeItem(const int & xpos, const int & ypos);
 		string getNeighbor(const int direction) const;
 		void addCreature(Creature * creature);
+		Item * parseItem(ifstream & map, string & line);
 		vector<Creature *> * getCreaturesOnMap();
 };
 
@@ -116,13 +118,13 @@ void Environment::saveToFile(const string & pathname) {
 	saveFile << "description" << endl << description << endl;
 	for(auto it : creaturesOnMap) {
 		saveFile << it->getName() << endl << it->getType() << endl << it->getXpos() << endl << it->getYpos() << endl << it->getImageName() << endl;
-		/*if(!(it->getBackpack().isEmpty())) {
-			for(auto itemIt = it->getBackpack().getItemMap().begin(); itemIt != it->getBackpack().getItemMap().end(); ++itemIt) {
+		if(!(it->getBackpack()->isEmpty())) {
+			for(auto itemIt = it->getBackpack()->getItemMap()->begin(); itemIt != it->getBackpack()->getItemMap()->end(); ++itemIt) {
 				saveFile << "item" << endl;
 				saveFile << itemIt->second->getName() << endl << itemIt->second->getWeight() << endl << itemIt->second->getImageName() << endl;
 				saveFile << itemIt->second->getYpos() << endl << itemIt->second->getXpos() << endl;
 			}
-		}*/
+		}
 	}
 	saveFile << "done";
 	saveFile.close();
@@ -152,22 +154,20 @@ void Environment::parseMapFile(ifstream & map, const string & path) {
 	}
 	int itemCnt = ITEM_START_CNT;
 	while(getline(map, line) && line != "description") {
-		string name = line;
-		getline(map, line);
-		int weigth = atoi(line.c_str());
-		getline(map, line);
-		string image = "items/" + line;
-		getline(map, line);
-		int y = atoi(line.c_str());
-		getline(map, line);
-		int x = atoi(line.c_str());
-		Item * item = new Item(weigth, name, image, x, y);
-		environmentMap.at(y)[x] = itemCnt;
+		Item * item = parseItem(map, line);
+		environmentMap.at(item->getYpos())[item->getXpos()] = itemCnt;
 		itemVector.push_back(item);
 		itemCnt++;
 	}
 	getline(map,description);
+	Creature * lastCreature;
 	while(getline(map, line) && line != "done") { //fetch monsters
+		while(line == "item") {
+			getline(map, line);
+			Item * item = parseItem(map, line);
+			lastCreature->pick_up(item);
+			getline(map, line);
+		}
 		string cName = line;
 		getline(map, line);
 		string type = line;
@@ -177,17 +177,30 @@ void Environment::parseMapFile(ifstream & map, const string & path) {
 		int x = atoi(line.c_str());
 		getline(map, line);
 		string image = "creatures/" + line;
-		cout << "hero skapas i: " << getName() << endl;
-		if(type == "Hero") {
-			
+		if(type == "Hero") {	
 			Character * hero = new Character(cName, type, x, y, image);
+			lastCreature = hero;
 			creaturesOnMap.insert(creaturesOnMap.begin(), hero);
 		}
 		else {
 			Monster * monster = new Monster(cName, type, x, y, image);
+			lastCreature = monster;
 			creaturesOnMap.push_back(monster);
 		}
 	}
+}
+
+Item * Environment::parseItem(ifstream & map, string & line) {
+	string name = line;
+	getline(map, line);
+	int weigth = atoi(line.c_str());
+	getline(map, line);
+	string image = "items/" + line;
+	getline(map, line);
+	int y = atoi(line.c_str());
+	getline(map, line);
+	int x = atoi(line.c_str());
+	return new Item(weigth, name, image, x, y);
 }
 
 void Environment::printMap() const {

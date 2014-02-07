@@ -9,6 +9,7 @@
 #include <fstream>
 #include "creatures/character.h"
 #include "environment/environment.h"
+#include "backpack.h"
 #include <unordered_map>
 
 #define START_MAP "start"
@@ -222,6 +223,11 @@ bool Board::takeCommand() {
 	else if(command == "save") {
 		cout << "What do you want to name this instance: ";
 		return saveGame();
+	}
+	else if(command == "checkbp") {
+		(*(currentMap->getCreaturesOnMap()->begin()))->printBackpack();
+		cout << "Choose an item to handle, or type 'back' to get back to the game.\nChoice: ";
+		cin >> command;
 	}
 	return true;
 }
