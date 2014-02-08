@@ -54,7 +54,7 @@ Environment::Environment(const string & name, const string & path) : name(name),
 
 Environment::~Environment() {
 	for(auto mapIterator = environmentMap.begin(); mapIterator != environmentMap.end(); ++mapIterator) {
-		delete mapIterator->second;
+		delete[] mapIterator->second;
 	}
 	for(auto it = creaturesOnMap.begin(); it != creaturesOnMap.end(); ++it) {
 		delete *it;

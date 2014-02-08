@@ -23,14 +23,14 @@ class Creature {
 
 	public:
 		Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos, const Artdisplayer & image);
-		~Creature();
+		virtual ~Creature();
 		string getName() const;
 		string getType() const;
 		string getImageName() const;
 		Backpack * getBackpack() const;
 		int getHP() const;
 		virtual void go(const int xDir, const int yDir) = 0; // – gå åt håll
-		bool fight(Creature * enemy); // – slåss med
+		virtual bool fight(Creature * enemy) = 0; // – slåss med
 		bool pick_up(const Item * item); // – ta upp sak
 		void drop(const Item * item); // – släpp sak på marken
 		void talk_to(Creature & npc); // – konversera med
@@ -46,7 +46,9 @@ Creature::Creature(const string & name, const string & type, const int & HP, con
 		mayMove = true;
 		backpack = new Backpack();
 	}
-Creature::~Creature(){}
+Creature::~Creature(){
+	delete backpack;
+}
 
 bool Creature::pick_up(const Item * item) {
 	return backpack->addItem(item);
@@ -83,15 +85,6 @@ void Creature::turnUsed(const bool & used) {
 	else {
 		mayMove = true;
 	}
-}
-
-bool Creature::fight(Creature * enemy) {
-	enemy->show();
-	cout << "You need to fight this " << enemy->getType() << "!" << endl;
-	cout << "Do you want to use:\n1. Your weapon\n2. Magic\nChoice: ";
-	string choice;
-	cin >> choice;
-	return true;
 }
 
 void Creature::printBackpack() const {

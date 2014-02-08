@@ -4,13 +4,12 @@
 #define MONSTER_H
 
 class Monster : public Creature {
-	private:
-		Item * item;
 	public:
 		Monster(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image);
-		~Monster();
+		virtual ~Monster();
 		virtual void go(const int xDir, const int yDir);
 		virtual bool pick_up(const Item * item);
+		virtual bool fight(Creature * enemy);
 
 };
 
@@ -25,12 +24,15 @@ bool Monster::pick_up(const Item * item){
 	return false;
 }
 
-
 void Monster::go(const int xDir, const int yDir) {
 	if(mayMove) {
 		xpos = xDir;
 		ypos = yDir;
 	}
+}
+
+bool Monster::fight(Creature * enemy) {
+	return true;
 }
 
 #endif

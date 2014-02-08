@@ -11,8 +11,9 @@ class Character : public Creature {
 	
 	public:
 		Character(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image);
-		~Character();
+		virtual ~Character();
 		virtual void go(const int xDir, const int yDir);
+		virtual bool fight(Creature * enemy);
 
 };
 
@@ -21,6 +22,15 @@ void Character::go(const int xDir, const int yDir) {
 		xpos = xDir;
 		ypos = yDir;
 	}
+}
+
+bool Character::fight(Creature * enemy) {
+	enemy->show();
+	cout << "You need to fight this " << enemy->getType() << "!" << endl;
+	cout << "Do you want to use:\n1. Your weapon\n2. Magic\nChoice: ";
+	string choice;
+	cin >> choice;
+	return true;
 }
 
 Character::Character(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image) 
