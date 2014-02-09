@@ -27,7 +27,7 @@ Artdisplayer::Artdisplayer(const string & name) { //name will contain part of th
     while (std::getline(ss, item, '/')) {
         imageName = item;
     }
-
+    cout << "in Artdisplayer! " << endl;
 	string path = "art/" + name + ".txt"; 
 	ifstream imageFile;
 	imageFile.open(path);

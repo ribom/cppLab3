@@ -33,7 +33,7 @@ class Creature {
 		virtual bool fight(Creature * enemy) = 0; // – slåss med
 		bool pick_up(const Item * item); // – ta upp sak
 		void drop(const Item * item); // – släpp sak på marken
-		void talk_to(Creature & npc); // – konversera med
+		void talk_to(Creature * npc); // – konversera med
 		int getXpos() const;
 		int getYpos() const;
 		void turnUsed(const bool & used);
@@ -95,8 +95,12 @@ void Creature::printBackpack() const {
 void Creature::drop(const Item * item){
 
 }
-void Creature::talk_to(Creature & npc) {
-
+void Creature::talk_to(Creature * npc) {
+	npc->show();
+	cout << "Hello there " << name << "! Your reputation precedes you, I am " << npc->getName() <<". What can I do for you?" << endl;
+	cout << "1. I want to sell stuff to you old man!\n2. I need to buy something!\nChoice: ";
+	string choice;
+	cin >> choice;
 }
 
 int Creature::getXpos() const {

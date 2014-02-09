@@ -297,6 +297,9 @@ void Board::printMapMatrix(const vector<Creature *> * creaturesOnMap) {
 		if((*it)->getType() == "Hero") {
 			mapMatrix[ypos][xpos] = 'H';
 		} 
+		else if((*it)->getType() == "Npc") {
+			mapMatrix[ypos][xpos] = 'N';	
+		}
 		else {
 			mapMatrix[ypos][xpos] = 'M';
 		}
@@ -351,8 +354,8 @@ bool Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos,
 		}
 		else {
 			it->go(wantXpos, wantYpos); 
-			xpos = wantXpos;
-			ypos = wantYpos;
+			xpos = it->getXpos();
+			ypos = it->getYpos();
 		}
 		return false;
 	}
@@ -372,13 +375,18 @@ void Board::lookForFight(vector<Creature *> * creaturesOnMap) {
 		difX = abs(heroX - monsterX);
 		difY = abs(heroY - monsterY);
 		if(difX + difY < 3) {
-			if((*(creaturesOnMap->begin()))->fight(*it)) {
-				mapMatrix[monsterY][monsterX] = ' ';
-				creaturesOnMap->erase(it);
-				--it;
+			if((*it)->getType() == "Npc") {
+				(*(creaturesOnMap->begin()))->talk_to(*it);
 			}
 			else {
-				info = "The monster has defeeated you, and the game is over!";
+				if((*(creaturesOnMap->begin()))->fight(*it)) {
+					mapMatrix[monsterY][monsterX] = ' ';
+					creaturesOnMap->erase(it);
+					--it;
+				}
+				else {
+					info = "The monster has defeeated you, and the game is over!";
+				}
 			}
 		}
 	}

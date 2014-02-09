@@ -1,0 +1,33 @@
+start			//name of map
+home			//name of southern neighbor (should be 0 if no neighbor exist in this direction)
+desert			//name of northern neighbor
+ocean			//name of western neighbor
+forest			//name of eastern neighbor
+7			//map height
+12			//map width
+100000000000		//map layout
+111000000000		-
+100000000000		-
+000000000000		-
+000000000000		-
+000000000011		-
+000000000001		-
+helm			//name of item
+15			//item weigth
+helm			//item image file name
+5			//item y-pos
+6			//item x-pos
+description		//this line lets the parser know there is no more items. The line below is the description.
+This is a plain field of roses. But far to the north you can see a lonely mountain...
+Joan the Great		//name of creature
+Hero			//type of creature
+4			//creature y-pos
+12			//creature X-pos
+hero			//creature image file name
+item			//this line tells the parsers the creature is carrying an item
+sword			//name of item (like above)
+20			-
+sword2			-
+13			-
+4			-
+done			//when there is no more creatures to load the parser is done.

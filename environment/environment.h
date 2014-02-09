@@ -9,6 +9,7 @@
 #include "../creatures/creature.h"
 #include "../creatures/monster.h"
 #include "../creatures/character.h"
+#include "../creatures/npc.h"
 #include "../backpack.h"
 #include "../item.h"
 
@@ -161,12 +162,15 @@ void Environment::parseMapFile(ifstream & map, const string & path) {
 	}
 	getline(map,description);
 	Creature * lastCreature;
-	while(getline(map, line) && line != "done") { //fetch monsters
+	while(getline(map, line)) { //fetch monsters
 		while(line == "item") {
 			getline(map, line);
 			Item * item = parseItem(map, line);
 			lastCreature->pick_up(item);
 			getline(map, line);
+		}
+		if(line == "done") {
+			break;
 		}
 		string cName = line;
 		getline(map, line);
@@ -177,10 +181,17 @@ void Environment::parseMapFile(ifstream & map, const string & path) {
 		int x = atoi(line.c_str());
 		getline(map, line);
 		string image = "creatures/" + line;
+		cout << "name: " << cName << endl;
+		cout << "path to image: " << image << endl;
 		if(type == "Hero") {	
 			Character * hero = new Character(cName, type, x, y, image);
 			lastCreature = hero;
 			creaturesOnMap.insert(creaturesOnMap.begin(), hero);
+		}
+		else if(type == "Npc") {
+			Npc * npc = new Npc(cName, type, x, y, image);
+			lastCreature = npc;
+			creaturesOnMap.insert(creaturesOnMap.begin(), npc);
 		}
 		else {
 			Monster * monster = new Monster(cName, type, x, y, image);
