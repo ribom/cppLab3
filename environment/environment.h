@@ -208,10 +208,12 @@ Item * Environment::parseItem(ifstream & map, string & line) {
 	getline(map, line);
 	string image = "items/" + line;
 	getline(map, line);
+	int price = atoi(line.c_str());
+	getline(map, line);
 	int y = atoi(line.c_str());
 	getline(map, line);
 	int x = atoi(line.c_str());
-	return new Item(weigth, name, image, x, y);
+	return new Item(weigth, name, image, x, y, price);
 }
 
 void Environment::printMap() const {

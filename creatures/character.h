@@ -14,6 +14,7 @@ class Character : public Creature {
 		virtual ~Character();
 		virtual void go(const int xDir, const int yDir);
 		virtual bool fight(Creature * enemy);
+		virtual void printBackpack() const;
 
 };
 
@@ -35,6 +36,11 @@ bool Character::fight(Creature * enemy) {
 
 Character::Character(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image) 
 	: Creature(name, type, 100, xpos, ypos, image) { //todo fixa så att hero å hp inte är statiska
+}
+
+void Character::printBackpack() const {
+	cout << "\nYour backpack contains the following:" << endl;
+	cout << *backpack << endl;
 }
 
 Character::~Character(){};

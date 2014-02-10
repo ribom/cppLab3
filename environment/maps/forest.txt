@@ -28,6 +28,7 @@ start
 Armor
 15
 armor
+40
 15
 10
 description

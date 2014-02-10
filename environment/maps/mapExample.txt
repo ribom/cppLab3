@@ -15,6 +15,7 @@ forest			//name of eastern neighbor
 helm			//name of item
 15			//item weigth
 helm			//item image file name
+23			//price of item
 5			//item y-pos
 6			//item x-pos
 description		//this line lets the parser know there is no more items. The line below is the description.
@@ -28,6 +29,7 @@ item			//this line tells the parsers the creature is carrying an item
 sword			//name of item (like above)
 20			-
 sword2			-
+20			-
 13			-
 4			-
 done			//when there is no more creatures to load the parser is done.

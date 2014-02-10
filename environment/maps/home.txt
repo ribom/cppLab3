@@ -26,6 +26,7 @@ item
 Ring of Doom
 4
 ring1
+30
 8
 9
 done

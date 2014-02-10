@@ -47,7 +47,6 @@ bool Backpack::addItem(const Item * item) {
 		if(capacity - item->getWeight() >= 0) {
 			itemMap->insert(make_pair(item->getName(), const_cast<Item*>(item)));
 			numberOfItems++;
-			cout << "backpack: " << *this << endl; 
 			return true;
 		} else {
 			cout << "This item weighs to much. You need " << item->getWeight() - capacity << " more capacity to carry it." << endl; 
@@ -58,10 +57,12 @@ bool Backpack::addItem(const Item * item) {
 
 ostream & operator<<(ostream & os, const Backpack & backpack) {
 	map<string, Item*> orderedItemMap(backpack.itemMap->begin(), backpack.itemMap->end());
+	size_t extraSpace = 20;
 
-	size_t extraSpace = 30;
+	os << "Name" << setw(extraSpace - 4) << "Weight" << setw(extraSpace - 4) << "Price" << endl;
 	for(auto mapIterator = orderedItemMap.begin(); mapIterator != orderedItemMap.end(); ++mapIterator) { 
-		os << mapIterator->second->getName() << setw(extraSpace - mapIterator->second->getName().size()) << mapIterator->second->getWeight() << endl;
+		os << mapIterator->second->getName() << setw(extraSpace - mapIterator->second->getName().size()) << 
+			mapIterator->second->getWeight() << setw(extraSpace - 4) << mapIterator->second->getPrice() << endl;
 	}
 	return os;
 }

@@ -10,6 +10,7 @@ class Monster : public Creature {
 		virtual void go(const int xDir, const int yDir);
 		virtual bool pick_up(const Item * item);
 		virtual bool fight(Creature * enemy);
+		virtual void printBackpack() const;
 
 };
 
@@ -33,6 +34,10 @@ void Monster::go(const int xDir, const int yDir) {
 
 bool Monster::fight(Creature * enemy) {
 	return true;
+}
+
+void Monster::printBackpack() const {
+	cout << "The " << getType() << " carried the following items: " << endl << *backpack << endl;
 }
 
 #endif

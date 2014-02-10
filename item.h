@@ -8,16 +8,17 @@ using namespace std;
 
 class Item {
 	private:
-		int weight, xpos, ypos;
+		int weight, xpos, ypos, price;
 		string name;
 		Artdisplayer itemImage;
 
 	public:
-		Item(const int & weigth, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos);
+		Item(const int & weigth, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos, const int & price);
 		~Item();
 		int getWeight() const;
 		int getYpos() const;
 		int getXpos() const;
+		int getPrice() const;
 		string getName() const;
 		Artdisplayer getImage() const;
 		string getImageName() const;
@@ -26,10 +27,14 @@ class Item {
 		friend ostream & operator<<(ostream & os, const Item & item);
 };
 
-Item::Item(const int & weight, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos)
- 	: weight(weight), xpos(xpos), ypos(ypos), name(name), itemImage(image) {}
+Item::Item(const int & weight, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos, const int & price)
+ 	: weight(weight), xpos(xpos), ypos(ypos), price(price), name(name), itemImage(image) {}
 
 Item::~Item(){}
+
+int Item::getPrice() const {
+	return price;
+}
 
 int Item::getWeight() const {
 	return weight;

@@ -225,6 +225,7 @@ bool Board::takeCommand() {
 		return saveGame();
 	}
 	else if(command == "checkbp") {
+		cout << "You have " << (*(currentMap->getCreaturesOnMap()->begin()))->getMoney() << " gold coins.";
 		(*(currentMap->getCreaturesOnMap()->begin()))->printBackpack();
 		cout << "Choose an item to handle, or type 'back' to get back to the game.\nChoice: ";
 		cin >> command;

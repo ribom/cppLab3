@@ -28,11 +28,13 @@ forest
 helm
 15
 helm
+10
 18
 18
 sword
 20
 sword2
+10
 13
 4
 description
