@@ -124,6 +124,10 @@ bool Board::takeCommand() {
 	else if(command == "checkhp") {
 		cout << "Your current HP is: " << (*(currentMap->getCreaturesOnMap()->begin()))->getHP() << endl;
 	}
+	else {
+		// lambda function
+		[&] { cout << (*(currentMap->getCreaturesOnMap()->begin()))->takeCommand(command) << endl; } ();
+	}
 	return true;
 }
 

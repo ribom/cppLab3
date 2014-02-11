@@ -14,6 +14,9 @@ class Creature {
 		string type;
 		int HP, maxHP;
 		Artdisplayer creatureImage;
+
+		typedef string (Creature::*stringPointer)() const;
+		map<string, Creature::stringPointer> memberPointerMap;
 		
 	protected:		
 		int xpos;
@@ -28,6 +31,7 @@ class Creature {
 		string getName() const;
 		string getType() const;
 		string getImageName() const;
+		string takeCommand(const string & command) const;
 		int getMoney() const;
 		void transaction(const int & priceOfItem);
 		Backpack * getBackpack() const;
@@ -47,10 +51,17 @@ class Creature {
 		virtual void printBackpack() const = 0;
 };
 
+//typedef string (Creature::*stringPointer)() const;
+
 Creature::Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos, const Artdisplayer & image) 
 	: name(name), type(type), HP(HP), maxHP(HP), creatureImage(image), xpos(xpos), ypos(ypos), money(50) {
 		mayMove = true;
 		backpack = new Backpack();
+
+		stringPointer nameGetter = &Creature::getName;
+		stringPointer typeGetter = &Creature::getType;
+		memberPointerMap.insert(make_pair("getType", typeGetter));
+		memberPointerMap.insert(make_pair("getName", nameGetter));
 	}
 Creature::~Creature(){
 	delete backpack;
@@ -64,6 +75,15 @@ void Creature::tellStory() const {}
 
 Backpack * Creature::getBackpack() const {
 	return backpack;
+}
+
+string Creature::takeCommand(const string & command) const{
+	if(memberPointerMap.find(command) != memberPointerMap.end()) {
+		stringPointer strPtr = (memberPointerMap.at(command));
+		return (this->*strPtr)();
+	}
+
+	return "something is wrong";
 }
 
 string Creature::getName() const {
