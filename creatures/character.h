@@ -8,6 +8,10 @@ using namespace std;
 class Character : public Creature {
 	private:
 		int position;
+		Item * armor;
+		Item * helm;
+		Item * sword;
+		Item * shield;
 	
 	public:
 		Character(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image);

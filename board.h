@@ -105,6 +105,28 @@ bool Board::loadSavedGame(const string & name) {
 	return true;
 }
 
+bool Board::takeCommand() {
+	cout << "\nCommand: ";
+	cin >> command;
+	if(command == "exit") {
+		return false;
+	} 
+	else if(command == "save") {
+		cout << "What do you want to name this instance: ";
+		return saveGame();
+	}
+	else if(command == "checkbp") {
+		cout << "You have " << (*(currentMap->getCreaturesOnMap()->begin()))->getMoney() << " gold coins.";
+		(*(currentMap->getCreaturesOnMap()->begin()))->printBackpack();
+		cout << "Choose an item to handle, or type 'back' to get back to the game.\nChoice: ";
+		cin >> command;
+	}
+	else if(command == "checkhp") {
+		cout << "Your current HP is: " << (*(currentMap->getCreaturesOnMap()->begin()))->getHP() << endl;
+	}
+	return true;
+}
+
 bool Board::startNewGame() {
 	system("clear");
 	cout << "The first thing you need to do is to choose a character name.\nName: ";
@@ -206,31 +228,12 @@ void Board::enterNewMap(const int & direction, Creature * creature, Environment 
 			mapMatrix = currentMap->updateField();
 			mapMatrix[creature->getYpos()][creature->getXpos()] = 'H';
 			printMapMatrix(currentMap->getCreaturesOnMap());
-		}
-	 	
+			cout << endl << currentMap->getDescription() << endl;
+		} 	
  	}
  	else {
  		cout << "it appears you went into oblivion..." << endl;
  	}
-}
-
-bool Board::takeCommand() {
-	cout << "\nCommand: ";
-	cin >> command;
-	if(command == "exit") {
-		return false;
-	} 
-	else if(command == "save") {
-		cout << "What do you want to name this instance: ";
-		return saveGame();
-	}
-	else if(command == "checkbp") {
-		cout << "You have " << (*(currentMap->getCreaturesOnMap()->begin()))->getMoney() << " gold coins.";
-		(*(currentMap->getCreaturesOnMap()->begin()))->printBackpack();
-		cout << "Choose an item to handle, or type 'back' to get back to the game.\nChoice: ";
-		cin >> command;
-	}
-	return true;
 }
 
 void Board::updateMaps() {

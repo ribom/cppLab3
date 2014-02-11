@@ -12,7 +12,7 @@ class Creature {
 	private:
 		string name;
 		string type;
-		int HP;
+		int HP, maxHP;
 		Artdisplayer creatureImage;
 		
 	protected:		
@@ -48,7 +48,7 @@ class Creature {
 };
 
 Creature::Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos, const Artdisplayer & image) 
-	: name(name), type(type), HP(HP), creatureImage(image), xpos(xpos), ypos(ypos), money(50) {
+	: name(name), type(type), HP(HP), maxHP(HP), creatureImage(image), xpos(xpos), ypos(ypos), money(50) {
 		mayMove = true;
 		backpack = new Backpack();
 	}

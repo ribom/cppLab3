@@ -12,6 +12,7 @@
 #include "../creatures/npc.h"
 #include "../backpack.h"
 #include "../item.h"
+#include "../object.h"
 
 #define NUMBER_OF_ITEM_ATTRIBUTES 4
 #define ITEM_START_CNT 2
@@ -29,6 +30,7 @@ class Environment {
 		string type;
 		string neighbors[4]; // 0 = south, 1 = north, 2 = west, 3 = east
 		vector<Item *> itemVector;
+		vector<Object *> objectVector;
 	public:
 		Environment(const string & name, const string & path);
 		~Environment();
@@ -38,6 +40,7 @@ class Environment {
 		void saveToFile(const string & pathname);
 		int getHeight() const;
 		int getWidth() const;
+		string getDescription() const;
 		vector<string> updateField();
 		Item * getItem(const int & xpos, const int & ypos);
 		void removeItem(const int & xpos, const int & ypos);
@@ -72,6 +75,10 @@ void Environment::addCreature(Creature * creature) {
 	else {
 		creaturesOnMap.push_back(creature);
 	}
+}
+
+string Environment::getDescription() const {
+	return description;
 }
 
 string Environment::getName() const {
@@ -160,9 +167,13 @@ void Environment::parseMapFile(ifstream & map, const string & path) {
 		itemVector.push_back(item);
 		itemCnt++;
 	}
-	getline(map,description);
+	getline(map, description);
+	while(getline(map, line) && line == "object") {
+		objectVector.push_back(new Object(map, &environmentMap));
+	}
+
 	Creature * lastCreature;
-	while(getline(map, line)) { //fetch monsters
+	while(getline(map, line)) { //fetch creatures
 		while(line == "item") {
 			getline(map, line);
 			Item * item = parseItem(map, line);
