@@ -17,8 +17,9 @@ start
 11111111111
 description
 This is your home, it is probably where you live.
-Merlin the Wise
+creatures
 Npc
+Merlin the Wise
 8
 9
 wizard
@@ -26,7 +27,7 @@ item
 Ring of Doom
 4
 ring1
-30
+100
 8
 9
 done

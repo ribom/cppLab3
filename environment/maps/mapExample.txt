@@ -20,6 +20,12 @@ helm			//item image file name
 6			//item x-pos
 description		//this line lets the parser know there is no more items. The line below is the description.
 This is a plain field of roses. But far to the north you can see a lonely mountain...
+object			//start of objects on map
+Door of Hell		//name of object
+bluekey			//name of key to object
+4			//ypos of object
+5			//xpos of object
+creatures		//start of creatures on map
 Joan the Great		//name of creature
 Hero			//type of creature
 4			//creature y-pos

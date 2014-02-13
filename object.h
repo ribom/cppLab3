@@ -1,4 +1,5 @@
 #include "item.h"
+#include "artdisplayer.h"
 #include <iostream>
 #include <unordered_map>
 #include <vector>
@@ -13,18 +14,28 @@ class Object {
 		string name;
 		string key;
 		int xpos, ypos;
+		Artdisplayer * objImage;
 
 	public:
 		Object(ifstream & object, unordered_map<int, int *> * environmentMap);
 		~Object();
-		void unlock(const string & itemKey, unordered_map<int, int *> * environmentMap, vector<Object *> * objectVector);
+		bool unlock(const string & itemKey);
 		const Object * getSelf() const;
+		void saveToFile(ofstream & saveFile);
+		string getName() const;
+		string getKey() const;
+		int getXpos() const;
+		int getYpos() const;
+		void show() const;
 };
 
 Object::Object(ifstream & object, unordered_map<int, int *> * environmentMap) {
 	string line;
 	getline(object, name);
 	getline(object, key);
+	getline(object, line);
+	string image = "items/" + line;
+	objImage = new Artdisplayer(image);
 	getline(object, line);
 	ypos = atoi(line.c_str());
 	getline(object, line);
@@ -33,20 +44,42 @@ Object::Object(ifstream & object, unordered_map<int, int *> * environmentMap) {
 	environmentMap->at(ypos)[xpos] = -1;
 }
 
-Object::~Object() {}
+void Object::show() const {
+	cout << *objImage << endl;
+}
+
+Object::~Object() {
+	delete objImage;
+}
+
+string Object::getKey() const {
+	return key;
+}
+
+string Object::getName() const {
+	return name;
+}
+
+int Object::getXpos() const {
+	return xpos;
+}
+
+int Object::getYpos() const {
+	return ypos;
+}
+
+void Object::saveToFile(ofstream & saveFile) {
+	saveFile << "object" << endl << name << endl << key << endl << ypos << endl << xpos << endl;
+}
 
 const Object * Object::getSelf() const {
 	return this;
 }
-void Object::unlock(const string & itemKey, unordered_map<int, int *> * environmentMap, vector<Object *> * objectVector) {
+bool Object::unlock(const string & itemKey) {
 	if(itemKey == key) {
-		environmentMap->at(ypos)[xpos] = 0;
-		for(auto it = objectVector->begin(); it != objectVector->end(); ++it) {
-			if((*it)->getSelf() == this) {
-				objectVector->erase(it);
-			}
-		}
+		return true;
 	}
+	return false;
 }
 
 #endif

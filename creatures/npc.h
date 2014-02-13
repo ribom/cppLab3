@@ -4,6 +4,7 @@
 
 #ifndef NPC_H
 #define NPC_H
+#define NPC_TYPE "Npc"
 
 using namespace std;
 
@@ -12,25 +13,57 @@ class Npc : public Creature {
 		string story;
 		void loadStory();
 	public:
-		Npc(const string & name, const string & type, const int & xpos, const int & ypos, const Artdisplayer & image);
+		Npc(ifstream & file);
 		virtual ~Npc();
 		virtual void go(const int xDir, const int yDir);
+		virtual void talk_to(Creature * hero); // – konversera med
 		virtual bool pick_up(const Item * item);
 		virtual bool fight(Creature * enemy);
 		virtual void tellStory() const;
 		virtual string sell(Creature * hero);
 		virtual string buy(Creature * hero);
 		virtual void printBackpack() const;
+		virtual bool action(Creature * hero);
+		virtual string getType() const;
 };
 
 
-Npc::Npc(const string & name, const string & type, const int & xpos, const int & ypos, const Artdisplayer & image) 
-	: Creature(name, type, 100, xpos, ypos, image) {
-		money = 100;
-		loadStory();
-	} 
+Npc::Npc(ifstream & file) : Creature(file) {
+	loadStory();
+	mapSign[0] = 'N';
+}
 
 Npc::~Npc() {}
+
+string Npc::getType() const {
+	return NPC_TYPE;
+}
+
+void Npc::talk_to(Creature * hero) {
+	string choice;
+	show();
+	cout << "Hello there " << hero->getName() << "! Your reputation precedes you, I am " << getName() <<". What can I do for you?" << endl;
+	while(choice != "4" && choice != "bye" && choice != "exit") {
+		cout << "1. I want to sell stuff to you old man!\n2. I need to buy something!\n3. How did you end up here?\n4. Well you just look creepy, bye..\nChoice: ";
+		cin >> choice;
+		if(choice == "1" || choice == "sell") {
+			choice = sell(hero);
+		}
+		else if(choice == "2" || choice == "buy") {
+			choice = buy(hero);
+		}
+		else if(choice == "3" || choice == "story") {
+			show();
+			tellStory();
+		}
+	}
+}
+
+bool Npc::action(Creature * hero) {
+	talk_to(hero);
+
+	return true;
+}
 
 string Npc::buy(Creature * hero) {
 	show();
@@ -93,8 +126,6 @@ string Npc::sell(Creature * hero) {
 		}
 	}
 	return nameOfItem;
-
-	return "";
 }
 
 void Npc::tellStory() const {

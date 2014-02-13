@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include "artdisplayer.h"
+#include <fstream>
+
 #ifndef ITEM_H
 #define ITEM_H
 
@@ -10,10 +12,10 @@ class Item {
 	private:
 		int weight, xpos, ypos, price;
 		string name;
-		Artdisplayer itemImage;
+		Artdisplayer * itemImage;
 
 	public:
-		Item(const int & weigth, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos, const int & price);
+		Item(ifstream & itemFile, string & line);
 		~Item();
 		int getWeight() const;
 		int getYpos() const;
@@ -23,14 +25,34 @@ class Item {
 		Artdisplayer getImage() const;
 		string getImageName() const;
 		void show() const;
+		void saveToFile(ofstream & saveFile);
 
 		friend ostream & operator<<(ostream & os, const Item & item);
 };
 
-Item::Item(const int & weight, const string & name, const Artdisplayer & image, const int & xpos , const int & ypos, const int & price)
- 	: weight(weight), xpos(xpos), ypos(ypos), price(price), name(name), itemImage(image) {}
+Item::Item(ifstream & itemFile, string & line) {
+	name = line;
+	getline(itemFile, line);
+	weight = atoi(line.c_str());
+	getline(itemFile, line);
+	string image = "items/" + line;
+	itemImage = new Artdisplayer(image);
+	getline(itemFile, line);
+	price = atoi(line.c_str());
+	getline(itemFile, line);
+	ypos = atoi(line.c_str());
+	getline(itemFile, line);
+	xpos = atoi(line.c_str());
+}
 
-Item::~Item(){}
+Item::~Item(){
+	delete itemImage;
+}
+
+void Item::saveToFile(ofstream & saveFile) {
+	saveFile << getName() << endl << getWeight() << endl << getImageName() << endl;
+	saveFile << getPrice() << endl << getYpos() << endl << getXpos() << endl;
+}
 
 int Item::getPrice() const {
 	return price;
@@ -51,15 +73,15 @@ int Item::getXpos() const {
 }
 
 string Item::getImageName() const {
-	return itemImage.getImageName();
+	return itemImage->getImageName();
 }
 
 Artdisplayer Item::getImage() const {
-	return itemImage;
+	return *itemImage;
 }
 
 void Item::show() const {
-	cout << itemImage;
+	cout << *itemImage;
 }
 
 ostream & operator<<(ostream & os, const Item & item) {

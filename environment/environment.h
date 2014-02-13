@@ -9,6 +9,7 @@
 #include "../creatures/creature.h"
 #include "../creatures/monster.h"
 #include "../creatures/character.h"
+#include "../creatures/creatureFactory.h"
 #include "../creatures/npc.h"
 #include "../backpack.h"
 #include "../item.h"
@@ -32,17 +33,19 @@ class Environment {
 		vector<Item *> itemVector;
 		vector<Object *> objectVector;
 	public:
-		Environment(const string & name, const string & path);
+		Environment(const string & name, const string & path, const unordered_map<string, CreatureFactory *> & creatureFactoryMap);
 		~Environment();
 		void printMap() const;
 		string getName() const;
-		void parseMapFile(ifstream & map, const string & path);
+		void parseMapFile(ifstream & map, const string & path, const unordered_map<string, CreatureFactory *> & creatureFactoryMap);
 		void saveToFile(const string & pathname);
 		int getHeight() const;
 		int getWidth() const;
 		string getDescription() const;
 		vector<string> updateField();
 		Item * getItem(const int & xpos, const int & ypos);
+		Object * getObject(const int & xpos, const int & ypos);
+		void removeObject(const int & xpos, const int & ypos);
 		void removeItem(const int & xpos, const int & ypos);
 		string getNeighbor(const int direction) const;
 		void addCreature(Creature * creature);
@@ -50,10 +53,11 @@ class Environment {
 		vector<Creature *> * getCreaturesOnMap();
 };
 
-Environment::Environment(const string & name, const string & path) : name(name), path(path) {
-	ifstream map;
-	parseMapFile(map, path);
-	map.close();
+Environment::Environment(const string & name, const string & path, const unordered_map<string, CreatureFactory *> & creatureFactoryMap) 
+	: name(name), path(path) {
+		ifstream map;
+		parseMapFile(map, path, creatureFactoryMap);
+		map.close();
 }
 
 Environment::~Environment() {
@@ -65,6 +69,9 @@ Environment::~Environment() {
 	}
 	for(auto it = itemVector.begin(); it != itemVector.end(); ++it) {
 		delete *it;
+	}
+	for(auto it : objectVector) {
+		delete it;
 	}
 }
 
@@ -97,6 +104,20 @@ Item * Environment::getItem(const int & xpos, const int & ypos) {
 	return itemVector.at(environmentMap.at(ypos)[xpos]-2);
 }
 
+Object * Environment::getObject(const int & xpos, const int & ypos) {
+	Object * ret;
+	for(auto it : objectVector) {
+		if(it->getXpos() == xpos && it->getYpos() == ypos) {
+			ret = it;
+		}
+	}
+	return ret;
+}
+
+void Environment::removeObject(const int & xpos, const int & ypos) {
+	environmentMap.at(ypos)[xpos] = 0;	
+}
+
 void Environment::removeItem(const int & xpos, const int & ypos) {
 	itemVector.at(environmentMap.at(ypos)[xpos]-2) = NULL;
 	environmentMap.at(ypos)[xpos] = 0;
@@ -119,18 +140,19 @@ void Environment::saveToFile(const string & pathname) {
 	}
 	for(auto it : itemVector) {
 		if(it != NULL) {
-			saveFile << it->getName() << endl << it->getWeight() << endl << it->getImageName() << endl;
-			saveFile << it->getYpos() << endl << it->getXpos() << endl;
+			it->saveToFile(saveFile);
 		}
 	}
 	saveFile << "description" << endl << description << endl;
+	for(auto it : objectVector) {
+		it->saveToFile(saveFile);
+	}
 	for(auto it : creaturesOnMap) {
-		saveFile << it->getName() << endl << it->getType() << endl << it->getXpos() << endl << it->getYpos() << endl << it->getImageName() << endl;
+		it->saveToFile(saveFile);
 		if(!(it->getBackpack()->isEmpty())) {
 			for(auto itemIt = it->getBackpack()->getItemMap()->begin(); itemIt != it->getBackpack()->getItemMap()->end(); ++itemIt) {
 				saveFile << "item" << endl;
-				saveFile << itemIt->second->getName() << endl << itemIt->second->getWeight() << endl << itemIt->second->getImageName() << endl;
-				saveFile << itemIt->second->getYpos() << endl << itemIt->second->getXpos() << endl;
+				itemIt->second->saveToFile(saveFile);
 			}
 		}
 	}
@@ -138,7 +160,7 @@ void Environment::saveToFile(const string & pathname) {
 	saveFile.close();
 }
 
-void Environment::parseMapFile(ifstream & map, const string & path) { 
+void Environment::parseMapFile(ifstream & map, const string & path, const unordered_map<string, CreatureFactory *> & creatureFactoryMap) { 
 	map.open(path);
 	if(map.is_open() != true) {
 		cout << "Could not find map: " << path << endl; 
@@ -162,7 +184,7 @@ void Environment::parseMapFile(ifstream & map, const string & path) {
 	}
 	int itemCnt = ITEM_START_CNT;
 	while(getline(map, line) && line != "description") {
-		Item * item = parseItem(map, line);
+		Item * item = new Item(map, line);
 		environmentMap.at(item->getYpos())[item->getXpos()] = itemCnt;
 		itemVector.push_back(item);
 		itemCnt++;
@@ -172,59 +194,11 @@ void Environment::parseMapFile(ifstream & map, const string & path) {
 		objectVector.push_back(new Object(map, &environmentMap));
 	}
 
-	Creature * lastCreature;
 	while(getline(map, line)) { //fetch creatures
-		while(line == "item") {
-			getline(map, line);
-			Item * item = parseItem(map, line);
-			lastCreature->pick_up(item);
-			getline(map, line);
-		}
-		if(line == "done") {
-			break;
-		}
-		string cName = line;
-		getline(map, line);
-		string type = line;
-		getline(map, line);
-		int y = atoi(line.c_str());
-		getline(map, line);
-		int x = atoi(line.c_str());
-		getline(map, line);
-		string image = "creatures/" + line;
-		cout << "name: " << cName << endl;
-		cout << "path to image: " << image << endl;
-		if(type == "Hero") {	
-			Character * hero = new Character(cName, type, x, y, image);
-			lastCreature = hero;
-			creaturesOnMap.insert(creaturesOnMap.begin(), hero);
-		}
-		else if(type == "Npc") {
-			Npc * npc = new Npc(cName, type, x, y, image);
-			lastCreature = npc;
-			creaturesOnMap.insert(creaturesOnMap.begin(), npc);
-		}
-		else {
-			Monster * monster = new Monster(cName, type, x, y, image);
-			lastCreature = monster;
-			creaturesOnMap.push_back(monster);
+		if(creatureFactoryMap.find(line) != creatureFactoryMap.end()) {
+			creaturesOnMap.push_back(creatureFactoryMap.at(line)->create(map));
 		}
 	}
-}
-
-Item * Environment::parseItem(ifstream & map, string & line) {
-	string name = line;
-	getline(map, line);
-	int weigth = atoi(line.c_str());
-	getline(map, line);
-	string image = "items/" + line;
-	getline(map, line);
-	int price = atoi(line.c_str());
-	getline(map, line);
-	int y = atoi(line.c_str());
-	getline(map, line);
-	int x = atoi(line.c_str());
-	return new Item(weigth, name, image, x, y, price);
 }
 
 void Environment::printMap() const {
@@ -267,6 +241,9 @@ vector<string> Environment::updateField() {
 			}
 			else if(mapIterator->second[i] > 1) {
 				row += "I";
+			}
+			else if(mapIterator->second[i] == -1) {
+				row += "O";
 			}
 		}
 		map.push_back(row); 

@@ -10,6 +10,11 @@
 #include "creatures/character.h"
 #include "environment/environment.h"
 #include "backpack.h"
+#include "creatures/creatureFactory.h"
+#include "creatures/characterFactory.h"
+#include "creatures/princessFactory.h"
+#include "creatures/npcFactory.h"
+#include "creatures/monsterFactory.h"
 #include <unordered_map>
 
 #define START_MAP "start"
@@ -22,6 +27,7 @@ class Board {
 	private:
 		Environment * currentMap;
 		unordered_map<string, Environment *> usedMaps;
+		unordered_map<string, CreatureFactory *> creatureFactoryMap;
 		string command;
 		string info;
 		vector<string> mapMatrix;
@@ -37,18 +43,21 @@ class Board {
 		bool takeCommand();
 		bool tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos, Environment * env);
 		void enterNewMap(const int & direction, Creature * creature, Environment * environment);
-		void lookForFight(vector<Creature *> * creaturesOnMap);
+		void lookForAction(vector<Creature *> * creaturesOnMap);
 		bool saveGame();
 		bool startNewGame();
 		bool loadSavedGame(const string & name);
+		void initFactoryMap();
 };
 
 
 Board::Board() {
+	initFactoryMap();
  	startNewGame();
 }
 
 Board::Board(string & name) {
+	initFactoryMap();
 	bool startUp = false;
 	while(!startUp) {
 		system("clear");
@@ -74,6 +83,16 @@ Board::~Board() {
 	for(auto it = usedMaps.begin(); it != usedMaps.end(); ++it) {
 		delete (*it).second;
 	}
+	for(auto it : creatureFactoryMap) {
+		delete it.second;
+	}
+}
+
+void Board::initFactoryMap() {
+	creatureFactoryMap.insert(make_pair("Hero", new CharacterFactory()));
+	creatureFactoryMap.insert(make_pair("Monster", new MonsterFactory()));
+	creatureFactoryMap.insert(make_pair("Npc", new NpcFactory()));
+	creatureFactoryMap.insert(make_pair("Princess", new PrincessFactory()));
 }
 
 bool Board::loadSavedGame(const string & name) {
@@ -94,7 +113,7 @@ bool Board::loadSavedGame(const string & name) {
 			filePath = "savedgames/" + name + "/" + mapName + ".txt";
 		}
 		if(usedMaps.find(mapName) == usedMaps.end()) {
-			usedMaps.insert(make_pair(mapName, new Environment(mapName, filePath)));
+			usedMaps.insert(make_pair(mapName, new Environment(mapName, filePath, creatureFactoryMap)));
 		}
 		if(cm) {
 			cm = false;
@@ -106,6 +125,10 @@ bool Board::loadSavedGame(const string & name) {
 }
 
 bool Board::takeCommand() {
+	if((*(currentMap->getCreaturesOnMap()->begin()))->action(*(currentMap->getCreaturesOnMap()->begin()))) {
+		cout << "You have won!" << endl;
+		return false;
+	}
 	cout << "\nCommand: ";
 	cin >> command;
 	if(command == "exit") {
@@ -113,6 +136,7 @@ bool Board::takeCommand() {
 	} 
 	else if(command == "save") {
 		cout << "What do you want to name this instance: ";
+		cin.ignore();
 		return saveGame();
 	}
 	else if(command == "checkbp") {
@@ -133,12 +157,11 @@ bool Board::startNewGame() {
 	string name;
 	cin.ignore();
 	getline(cin, name);
-	string image = "creatures/hero";
-	Character * hero = new Character(name, "Hero", 10, 18, image);
+	Character * hero = new Character(name);
 	cout << "Great choice " << hero->getName() << "!" << endl;
 	string s = "start.txt";
 	string startPath = START_PATH + s;
-	currentMap = new Environment(START_MAP, startPath);
+	currentMap = new Environment(START_MAP, startPath, creatureFactoryMap);
 	usedMaps.insert(make_pair(START_MAP, currentMap));
 	usedMaps.at(START_MAP);
 	currentMap->addCreature(hero);
@@ -149,7 +172,6 @@ bool Board::startNewGame() {
 
 bool Board::saveGame() {
 	char name[100];	
-	cin.ignore();
 	cin.getline(name, 100);
 
 	char pathname[] = "savedgames/";
@@ -177,13 +199,13 @@ bool Board::saveGame() {
 		perror("Could not save game: ");
 		if(errno == EEXIST) {
 			cout << "Please choose another name: ";
-			saveGame();
+			return saveGame();
 		} 
 		else {
 			cout << "Do you want to try again? (y/n): ";
 			cin >> command;
 			if(command == "y") {
-				saveGame();
+				return saveGame();
 			}
 		}
 	}
@@ -211,7 +233,7 @@ void Board::enterNewMap(const int & direction, Creature * creature, Environment 
 	if(nextMap != "0") {
 		if(usedMaps.find(nextMap) == usedMaps.end()) {
 			string path = START_PATH + nextMap + ".txt";
-			usedMaps.insert(make_pair(nextMap, new Environment(nextMap, path)));
+			usedMaps.insert(make_pair(nextMap, new Environment(nextMap, path, creatureFactoryMap)));
 		}
 		vector<Creature *> * creaturesOnMap = environment->getCreaturesOnMap();
 		for(auto it = creaturesOnMap->begin(); it != creaturesOnMap->end(); ++it) {
@@ -288,7 +310,7 @@ void Board::updateMainMap() {
 			}
 			printMapMatrix(creaturesOnMap);
 		}
-		lookForFight(creaturesOnMap);
+		lookForAction(creaturesOnMap);
 	}
 	cout << info << endl;
 }
@@ -298,15 +320,7 @@ void Board::printMapMatrix(const vector<Creature *> * creaturesOnMap) {
 	for(auto it = creaturesOnMap->rbegin(); it != creaturesOnMap->rend(); ++it) {
 		int xpos = (*it)->getXpos();
 		int ypos = (*it)->getYpos();
-		if((*it)->getType() == "Hero") {
-			mapMatrix[ypos][xpos] = 'H';
-		} 
-		else if((*it)->getType() == "Npc") {
-			mapMatrix[ypos][xpos] = 'N';	
-		}
-		else {
-			mapMatrix[ypos][xpos] = 'M';
-		}
+		mapMatrix[ypos][xpos] = (*it)->getMapSign();
 	}
 	system("clear");
 	for(unsigned j = 0; j < mapMatrix.size(); ++j) { 
@@ -356,6 +370,18 @@ bool Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos,
 				info = "That's the wall! And you're not a ghost, no matter what you might believe!";
 			}
 		}
+		else if(map[wantYpos][wantXpos] == 'O') {
+			if(it->getType() == "Hero") {
+				if(it->tryUnlockObject(currentMap->getObject(wantXpos, wantYpos))) {
+					info = "You have unlocked the " + currentMap->getObject(wantXpos, wantYpos)->getName() + "\n";
+					map[wantYpos][wantXpos] = ' ';
+					currentMap->removeObject(wantXpos, wantYpos);
+				}
+				else {
+					info = "You do not have the required item to unlock the " + currentMap->getObject(wantXpos, wantYpos)->getName() + "\n"; 
+				}
+			}
+		}
 		else {
 			it->go(wantXpos, wantYpos); 
 			xpos = it->getXpos();
@@ -368,7 +394,7 @@ bool Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos,
 	return true;
 }
 
-void Board::lookForFight(vector<Creature *> * creaturesOnMap) {
+void Board::lookForAction(vector<Creature *> * creaturesOnMap) {
 	int heroX, heroY, monsterX, monsterY, difX, difY;
 
 	heroX = (*(creaturesOnMap->begin()))->getXpos();
@@ -378,19 +404,18 @@ void Board::lookForFight(vector<Creature *> * creaturesOnMap) {
 		monsterY = (*it)->getYpos();
 		difX = abs(heroX - monsterX);
 		difY = abs(heroY - monsterY);
-		if(difX + difY < 3) {
-			if((*it)->getType() == "Npc") {
-				(*(creaturesOnMap->begin()))->talk_to(*it);
-			}
-			else {
-				if((*(creaturesOnMap->begin()))->fight(*it)) {
-					mapMatrix[monsterY][monsterX] = ' ';
-					creaturesOnMap->erase(it);
-					--it;
-				}
-				else {
+		if(difX < 2 && difY < 2) {
+			if((*it)->action(*(creaturesOnMap->begin()))) {
+
+				if((*(creaturesOnMap->begin()))->dead()) {
 					info = "The monster has defeeated you, and the game is over!";
 				}
+			}
+			else {
+				mapMatrix[monsterY][monsterX] = ' ';
+				creaturesOnMap->erase(it);
+				delete *it;
+				--it;
 			}
 		}
 	}

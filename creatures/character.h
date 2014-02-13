@@ -3,24 +3,49 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
+#define CHARACTER_TYPE "Hero"
+
 using namespace std;
 
 class Character : public Creature {
 	private:
-		int position;
-		Item * armor;
-		Item * helm;
-		Item * sword;
-		Item * shield;
+		bool winner;
 	
 	public:
-		Character(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image);
+		Character(ifstream & file);
+		Character(const string & name);
 		virtual ~Character();
 		virtual void go(const int xDir, const int yDir);
 		virtual bool fight(Creature * enemy);
 		virtual void printBackpack() const;
+		virtual bool action(Creature * enemy);
+		virtual string getType() const;
 
 };
+
+Character::Character(ifstream & file) : Creature(file) {
+	mapSign[0] = 'H';
+	winner = false;
+}
+
+Character::Character(const string & name) : Creature(name) {
+	mapSign[0] = 'H';
+	winner = false;
+}
+
+Character::~Character(){};
+
+string Character::getType() const {
+	return CHARACTER_TYPE;
+}
+
+bool Character::action(Creature * creature) {
+	if(creature->getType() == "Princess") {
+		winner = true;
+	}
+
+	return winner;
+}
 
 void Character::go(const int xDir, const int yDir) {
 	if(mayMove) {
@@ -30,24 +55,12 @@ void Character::go(const int xDir, const int yDir) {
 }
 
 bool Character::fight(Creature * enemy) {
-	enemy->show();
-	cout << "You need to fight this " << enemy->getType() << "!" << endl;
-	cout << "Do you want to use:\n1. Your weapon\n2. Magic\nChoice: ";
-	string choice;
-	cin >> choice;
 	return true;
-}
-
-Character::Character(const string & name, const string & type, int xpos, int ypos, const Artdisplayer & image) 
-	: Creature(name, type, 100, xpos, ypos, image) { //todo fixa så att hero å hp inte är statiska
 }
 
 void Character::printBackpack() const {
 	cout << "\nYour backpack contains the following:" << endl;
 	cout << *backpack << endl;
 }
-
-Character::~Character(){};
-
 
 #endif

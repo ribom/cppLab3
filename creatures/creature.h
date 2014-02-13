@@ -5,6 +5,7 @@
 #include "../item.h"
 #include "../artdisplayer.h"
 #include "../backpack.h"
+#include "../object.h"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ class Creature {
 		string name;
 		string type;
 		int HP, maxHP;
-		Artdisplayer creatureImage;
+		Artdisplayer * creatureImage;
 		
 	protected:		
 		int xpos;
@@ -21,12 +22,14 @@ class Creature {
 		bool mayMove;
 		Backpack * backpack;
 		int money;
+		char mapSign[1];
 
 	public:
-		Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos, const Artdisplayer & image);
+		Creature(ifstream & file);
+		Creature(const string & name);
 		virtual ~Creature();
 		string getName() const;
-		string getType() const;
+		virtual string getType() const {return "Failll!!!!!";}
 		string getImageName() const;
 		int getMoney() const;
 		void transaction(const int & priceOfItem);
@@ -34,26 +37,87 @@ class Creature {
 		int getHP() const;
 		virtual void go(const int xDir, const int yDir) = 0; // – gå åt håll
 		virtual bool fight(Creature * enemy) = 0; // – slåss med
+		virtual bool action(Creature * enemy) = 0;
 		virtual void tellStory() const;
 		virtual string sell(Creature * hero) {return NULL;}
 		virtual string buy(Creature * hero) {return NULL;}
 		bool pick_up(const Item * item); // – ta upp sak
 		void drop(const Item * item); // – släpp sak på marken
-		void talk_to(Creature * npc); // – konversera med
+		virtual void talk_to(Creature * npc); // – konversera med
 		int getXpos() const;
 		int getYpos() const;
 		void turnUsed(const bool & used);
 		void show() const;
+		bool dead() const;
 		virtual void printBackpack() const = 0;
+		bool tryUnlockObject(Object * object);
+		void saveToFile(ofstream & saveFile);
+		char getMapSign() const;
 };
 
-Creature::Creature(const string & name, const string & type, const int & HP, const int & xpos, const int & ypos, const Artdisplayer & image) 
-	: name(name), type(type), HP(HP), maxHP(HP), creatureImage(image), xpos(xpos), ypos(ypos), money(50) {
-		mayMove = true;
-		backpack = new Backpack();
+Creature::Creature(ifstream & file) {
+	HP = 100;
+	maxHP = 100;
+	mayMove = true;
+	money = 60;
+	backpack = new Backpack();
+	type = this->getType();
+	getline(file, name);
+
+	string line;
+	getline(file, line);
+	ypos = atoi(line.c_str());
+	getline(file, line);
+	xpos = atoi(line.c_str());
+
+	getline(file, line);
+	string image = "creatures/" + line;
+	creatureImage = new Artdisplayer(image);
+
+	while(getline(file, line) && line == "item") {
+		getline(file, line);
+		this->pick_up(new Item(file, line));
 	}
+}
+
+Creature::Creature(const string & name) : name(name), type("Hero"), HP(100), maxHP(100), xpos(10), ypos(18), mayMove(true) {
+		creatureImage = new Artdisplayer("creatures/hero");
+		backpack = new Backpack();
+		money = 60;
+}
+
+char Creature::getMapSign() const {
+	return mapSign[0];
+}
+
 Creature::~Creature(){
 	delete backpack;
+	delete creatureImage;
+}
+
+bool Creature::dead() const {
+	if(HP <= 0) {
+		return true;
+	}
+	return false;
+}
+
+bool Creature::tryUnlockObject(Object * object) {
+	string command;
+	object->show();
+	cout << "This is the " << object->getName() << ". To unlock this you need to use " << object->getKey() << "." << endl;
+	cout << "Do you want to use this item to unlock " << object->getName()  << "? (y/n): ";
+	cin >> command;
+	if(command == "y") {
+		if(backpack->getItemMap()->find(object->getKey()) != backpack->getItemMap()->end()) {
+			return object->unlock(object->getKey());
+		}	
+	}
+	return false;
+}
+
+void Creature::saveToFile(ofstream & saveFile) {
+	saveFile << "creatures" << endl << getType() << endl << getName() << endl << getYpos() << endl << getXpos() << endl << getImageName() << endl;
 }
 
 bool Creature::pick_up(const Item * item) {
@@ -70,12 +134,8 @@ string Creature::getName() const {
 	return name;
 }
 
-string Creature::getType() const {
-	return type;
-}
-
 string Creature::getImageName() const {
-	return creatureImage.getImageName();
+	return creatureImage->getImageName();
 }
 
 int Creature::getMoney() const {
@@ -90,7 +150,7 @@ int Creature::getHP() const {
 }
 
 void Creature::show() const {
-	cout << creatureImage;
+	cout << *creatureImage;
 }
 
 void Creature::turnUsed(const bool & used) {
@@ -105,25 +165,7 @@ void Creature::turnUsed(const bool & used) {
 void Creature::drop(const Item * item){
 
 }
-void Creature::talk_to(Creature * npc) {
-	string choice;
-	npc->show();
-	cout << "Hello there " << name << "! Your reputation precedes you, I am " << npc->getName() <<". What can I do for you?" << endl;
-	while(choice != "4" && choice != "bye" && choice != "exit") {
-		cout << "1. I want to sell stuff to you old man!\n2. I need to buy something!\n3. How did you end up here?\n4. Well you just look creepy, bye..\nChoice: ";
-		cin >> choice;
-		if(choice == "1" || choice == "sell") {
-			choice = npc->sell(this);
-		}
-		else if(choice == "2" || choice == "buy") {
-			choice = npc->buy(this);
-		}
-		else if(choice == "3" || choice == "story") {
-			npc->show();
-			npc->tellStory();
-		}
-	}
-}
+void Creature::talk_to(Creature * npc) {}
 
 int Creature::getXpos() const {
 	return xpos;
