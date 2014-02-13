@@ -1,4 +1,18 @@
-Hello and welcome to our fantastic game!
+Hello and welcome to our fantastic game! An innocent princess has been kidnapped
+by an evil dragon. She needs someone to save her. She needs YOU to save her.
+Go get her tiger ;)
+
+You move by using 
+
+	w - up, 
+	s - down, 
+	a - left, 
+	d - right, 
+
+You can save by typing 'save' and check the contents of your backpack by typing
+'checkbp'. There are also some secret commands, they are 'getName' and 'getType', 
+but HUSH don't tell anybody! If you want to exit type 'exit', but why would you
+want to do that? The rest should be self explanatory. Enjoy!
 
 1. Start a new game
 2. Load an existing game

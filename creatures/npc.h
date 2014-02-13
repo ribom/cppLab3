@@ -31,6 +31,7 @@ class Npc : public Creature {
 Npc::Npc(ifstream & file) : Creature(file) {
 	loadStory();
 	mapSign[0] = 'N';
+	money = 300;
 }
 
 Npc::~Npc() {}

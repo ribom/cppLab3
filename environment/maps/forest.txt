@@ -33,3 +33,9 @@ armor
 10
 description
 You've entered a great forest.. Try to find your way out!
+creatures
+Bat
+Wild bat
+8
+8
+bat

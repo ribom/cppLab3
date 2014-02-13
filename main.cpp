@@ -9,11 +9,13 @@ using namespace std;
 
 bool readIntro();
 void clearScreen();
-void createCharacter(bool newGame);
+//void createCharacter(bool newGame);
 Board * loadSavedGame();
 
 int main() {
 
+	system("clear");
+	
 	bool run = true;
 	bool newGame = readIntro();
 	Board * board;
@@ -24,7 +26,6 @@ int main() {
 	else {
 		board = loadSavedGame();
 	}
-
 
 	while(run) {
 		run = board->takeCommand();

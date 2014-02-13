@@ -15,6 +15,9 @@ class Creature {
 		string type;
 		int HP, maxHP;
 		Artdisplayer * creatureImage;
+
+		typedef string (Creature::*stringPointer)() const;
+		map<string, Creature::stringPointer> memberPointerMap;
 		
 	protected:		
 		int xpos;
@@ -29,6 +32,7 @@ class Creature {
 		Creature(const string & name);
 		virtual ~Creature();
 		string getName() const;
+		string takeCommand(const string & command) const;
 		virtual string getType() const {return "Failll!!!!!";}
 		string getImageName() const;
 		int getMoney() const;
@@ -53,13 +57,13 @@ class Creature {
 		bool tryUnlockObject(Object * object);
 		void saveToFile(ofstream & saveFile);
 		char getMapSign() const;
+		void initMemberFunctionPointers();
 };
 
 Creature::Creature(ifstream & file) {
 	HP = 100;
 	maxHP = 100;
 	mayMove = true;
-	money = 60;
 	backpack = new Backpack();
 	type = this->getType();
 	getline(file, name);
@@ -78,12 +82,31 @@ Creature::Creature(ifstream & file) {
 		getline(file, line);
 		this->pick_up(new Item(file, line));
 	}
+
+	initMemberFunctionPointers();
 }
 
 Creature::Creature(const string & name) : name(name), type("Hero"), HP(100), maxHP(100), xpos(10), ypos(18), mayMove(true) {
 		creatureImage = new Artdisplayer("creatures/hero");
 		backpack = new Backpack();
-		money = 60;
+
+		initMemberFunctionPointers();		
+}
+
+void Creature::initMemberFunctionPointers() {
+	stringPointer nameGetter = &Creature::getName;
+	stringPointer typeGetter = &Creature::getType;
+	memberPointerMap.insert(make_pair("getType", typeGetter));
+	memberPointerMap.insert(make_pair("getName", nameGetter));
+}
+
+string Creature::takeCommand(const string & command) const{
+	if(memberPointerMap.find(command) != memberPointerMap.end()) {
+		stringPointer strPtr = (memberPointerMap.at(command));
+		return (this->*strPtr)();
+	}
+
+	return "something is wrong";
 }
 
 char Creature::getMapSign() const {

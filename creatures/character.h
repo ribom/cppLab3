@@ -26,11 +26,13 @@ class Character : public Creature {
 Character::Character(ifstream & file) : Creature(file) {
 	mapSign[0] = 'H';
 	winner = false;
+	money = 60;
 }
 
 Character::Character(const string & name) : Creature(name) {
 	mapSign[0] = 'H';
 	winner = false;
+	money = 60;
 }
 
 Character::~Character(){};

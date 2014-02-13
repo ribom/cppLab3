@@ -15,6 +15,9 @@
 #include "creatures/princessFactory.h"
 #include "creatures/npcFactory.h"
 #include "creatures/monsterFactory.h"
+#include "creatures/dragonFactory.h"
+#include "creatures/trexFactory.h"
+#include "creatures/batFactory.h"
 #include <unordered_map>
 
 #define START_MAP "start"
@@ -93,6 +96,9 @@ void Board::initFactoryMap() {
 	creatureFactoryMap.insert(make_pair("Monster", new MonsterFactory()));
 	creatureFactoryMap.insert(make_pair("Npc", new NpcFactory()));
 	creatureFactoryMap.insert(make_pair("Princess", new PrincessFactory()));
+	creatureFactoryMap.insert(make_pair("Dragon", new DragonFactory()));
+	creatureFactoryMap.insert(make_pair("Trex", new TrexFactory()));
+	creatureFactoryMap.insert(make_pair("Bat", new BatFactory()));
 }
 
 bool Board::loadSavedGame(const string & name) {
@@ -125,6 +131,7 @@ bool Board::loadSavedGame(const string & name) {
 }
 
 bool Board::takeCommand() {
+	info = "";
 	if((*(currentMap->getCreaturesOnMap()->begin()))->action(*(currentMap->getCreaturesOnMap()->begin()))) {
 		cout << "You have won!" << endl;
 		return false;
@@ -147,6 +154,9 @@ bool Board::takeCommand() {
 	}
 	else if(command == "checkhp") {
 		cout << "Your current HP is: " << (*(currentMap->getCreaturesOnMap()->begin()))->getHP() << endl;
+	} else {
+		// lambda function
+		[&] { info = "Response to command '" + command + "' is: " + (*(currentMap->getCreaturesOnMap()->begin()))->takeCommand(command); } ();
 	}
 	return true;
 }
@@ -277,7 +287,6 @@ void Board::updateMaps() {
 }
 
 void Board::updateMainMap() {
-	info = "";
 	bool enterdNewMap;
 	vector<Creature *> * creaturesOnMap = currentMap->getCreaturesOnMap();
 	mapMatrix = currentMap->updateField();
@@ -382,7 +391,7 @@ bool Board::tryMove(vector<string> & map, Creature * it, int & xpos, int & ypos,
 				}
 			}
 		}
-		else {
+		else if(map[wantYpos][wantXpos] == ' ' || map[wantYpos][wantXpos] == 'I'){
 			it->go(wantXpos, wantYpos); 
 			xpos = it->getXpos();
 			ypos = it->getYpos();
